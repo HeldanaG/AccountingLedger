@@ -78,36 +78,41 @@ public class AccountingLedgerApp {
 
     // Method for Add Deposit
     public static void addDeposit() {
-        boolean appRunning = true;
-        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
-                "                                🏦 ADD A NEW DEPOSIT                             \n"+
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                                🏦 ADD A NEW DEPOSIT                             \n"+
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        // Boolean to keep the app running until user chooses to exit
+        boolean appRunning = true;
+        // Loop to keep showing the menu until appRunning becomes false
         while (appRunning) {
             try {
+                // Refresh current time
+                currentTime = LocalDateTime.now();
+                formatedCurrentTime = currentTime.format(currentTimeFormatter);
 
-
+                // split current time and date separatly so that we can write it to the file
                 String[] dateTimeParts = formatedCurrentTime.split(" ");
                 String date = dateTimeParts[0].trim();
                 String time = dateTimeParts[1].trim();
 
-                // Prompt user for deposit details
+                // Prompt user for deposit details Prompt user
                 String description = capitalizeWords(askQuestion("Enter some Description about the deposit: "));
                 while (description.isEmpty()) {
                     description = capitalizeWords(askQuestion("Description cannot be empty. Enter description again: "));
                 }
 
+                // Prompt user for vendor name and validate input
                 String vendor = capitalizeWords(askQuestion("Enter vendor: "));
                 while (vendor.isEmpty()) {
                     vendor = capitalizeWords(askQuestion("Vendor cannot be empty. Enter vendor again: "));
                 }
 
+                // Prompt user for deposit amount and validate input
                 double amount = Double.parseDouble(askQuestion("Enter deposit amount: "));
                 while (amount <= 0) {
                     amount = Double.parseDouble(askQuestion("Amount must be positive. Enter deposit amount: "));
                 }
-
-
 
                 // OPEN a new BufferedWriter locally in append mode
                 BufferedWriter buffWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv", true));
@@ -115,14 +120,18 @@ public class AccountingLedgerApp {
 
                 // Write the transaction details
                 String depositEntry = date + " | " + time + " | " + description + " | " + vendor + " | " + amount;
-                buffWriter.write(depositEntry);
+                buffWriter.write(depositEntry); // write inputs to transactions file
                 buffWriter.newLine(); // go to next line for the next entry
                 // Close the writer
                 buffWriter.close();
 
+                // Also add to transactions ArrayList
+                Transaction newDeposit = new Transaction(LocalDate.parse(date), LocalTime.parse(time), description, vendor, amount);
+                transactions.add(newDeposit);
+
                 System.out.println("\nDeposit added successfully!");
 
-                // Ask if the user wants to add another deposit
+                // Ask if the user wants to add another deposit and validate input
                 String depositeAgain =askQuestion("Would you like to add another deposit? (y/n): ");
 
                 if (depositeAgain.equalsIgnoreCase("y")) {
@@ -149,11 +158,84 @@ public class AccountingLedgerApp {
             }
         }
     }
-
-
+    
     // Method for Make Payment
     public static void makePayment() {
-        System.out.println("\n[Make Payment feature will be implemented here]");
+        boolean appRunning = true;
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                "                                🧾 MAKE A PAYMENT                                \n"+
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+        while (appRunning) {
+            try {
+                // Refresh current time
+                currentTime = LocalDateTime.now();
+                formatedCurrentTime = currentTime.format(currentTimeFormatter);
+
+                String[] dateTimeParts = formatedCurrentTime.split(" ");
+                String date = dateTimeParts[0].trim();
+                String time = dateTimeParts[1].trim();
+
+                // Prompt user for payment details
+                String description = capitalizeWords(askQuestion("Enter some Description about the payment: "));
+                while (description.isEmpty()) {
+                    description = capitalizeWords(askQuestion("Description cannot be empty. Enter description again: "));
+                }
+
+                String vendor = capitalizeWords(askQuestion("Enter vendor: "));
+                while (vendor.isEmpty()) {
+                    vendor = capitalizeWords(askQuestion("Vendor cannot be empty. Enter vendor again: "));
+                }
+
+                double amount = Double.parseDouble(askQuestion("Enter payment amount: "));
+                while (amount <= 0) {
+                    amount = Double.parseDouble(askQuestion("Payment amount can't be zero. Enter payment amount: "));
+                }
+
+                // Make amount negative for payment
+                amount = -Math.abs(amount);
+
+                // OPEN a new BufferedWriter locally in append mode
+                BufferedWriter buffWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv", true));
+
+                // Write the payment details
+                String paymentEntry = date + " | " + time + " | " + description + " | " + vendor + " | " + amount;
+                buffWriter.write(paymentEntry);
+                buffWriter.newLine(); // go to next line for the next entry
+                buffWriter.close();
+
+                // Also add to transactions ArrayList
+                Transaction newPayment = new Transaction(LocalDate.parse(date), LocalTime.parse(time), description, vendor, amount);
+                transactions.add(newPayment);
+
+                System.out.println("\nPayment added successfully!");
+
+                // Ask if the user wants to make another payment
+                String payAgain = askQuestion("Would you like to make another payment? (y/n): ");
+
+                if (payAgain.equalsIgnoreCase("y")) {
+                    continue;
+                } else if (payAgain.equalsIgnoreCase("n")) {
+                    appRunning = false;
+                } else {
+                    payAgain = askQuestion("Invalid Input! Please Enter y or n: ");
+
+                    while (!(payAgain.equalsIgnoreCase("y") || payAgain.equalsIgnoreCase("n"))) {
+                        payAgain = askQuestion("Invalid Input! Please Enter y or n: ");
+                        if (payAgain.equalsIgnoreCase("y")) {
+                            continue;
+                            // If user doesn't want to add again, stop the loop
+                        } else {
+                            appRunning = false;
+                        }
+                    }
+                }
+
+            } catch (Exception e) {
+                System.out.println("An error occurred. Please try again!");
+                input.nextLine(); // clear the buffer
+            }
+        }
     }
 
     // Method for Ledger Menu
