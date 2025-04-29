@@ -364,7 +364,7 @@ public class AccountingLedgerApp {
                         " 3 - Year To Date                                                                    \n" +
                         " 4 - Previous Year                                                                   \n" +
                         " 5 - Search by Vendor                                                                \n" +
-                        " 6 - Challenge Yourself - Custom Report                                              \n" +
+                        " 6 - Custom Report                                              \n" +
                         " 0 - Back to Ledger Menu                                                             \n" +
                         " H - Return to Home Menu                                                             \n" +
                         "-----------------------------------------------------------------------------------");
@@ -387,7 +387,7 @@ public class AccountingLedgerApp {
                         searchByVendor();
                         break;
                     case "6":
-                        //challengeYourselfReport();
+                        customSearchReport();
                         break;
                     case "0":
                         appRunning = false; // Go back to Ledger Menu
@@ -444,12 +444,11 @@ public class AccountingLedgerApp {
                 System.out.println("Skipping an invalid transaction date: " + transaction.getDate());
             }
         }
-        System.out.println("-------------------------------------------------------------------------------------\n");
-
         // If no transactions found, inform the user
         if (!anyFound) {
             System.out.println("No transactions found for this month.");
         }
+        System.out.println("-------------------------------------------------------------------------------------\n");
     }
     // Displays all transactions that occurred in the previous month and current year
     public static void previousMonthReport() {
@@ -493,13 +492,11 @@ public class AccountingLedgerApp {
                 System.out.println("Skipping invalid transaction: " + e.getMessage());
             }
         }
-        System.out.println("-------------------------------------------------------------------------------------\n");
-
-
         // Inform user if no results found
         if (!anyFound) {
             System.out.println("No transactions found for the previous month.");
         }
+        System.out.println("-------------------------------------------------------------------------------------\n");
     }
     // Displays all transactions that occurred in the current year
     public static void yearToDateReport() {
@@ -540,12 +537,12 @@ public class AccountingLedgerApp {
                 System.out.println("Skipping transaction due to error: " + e.getMessage());
             }
         }
-        System.out.println("-------------------------------------------------------------------------------------\n");
 
         // If no matching entries were found, let the user know
         if (!anyFound) {
             System.out.println("No transactions found for this year up to today.");
         }
+        System.out.println("-------------------------------------------------------------------------------------\n");
     }
     // Displays all transactions that occurred in the previous year
     public static void previousYearReport() {
@@ -588,12 +585,13 @@ public class AccountingLedgerApp {
                 System.out.println("Skipping due to date error: " + e.getMessage());
             }
         }
-        System.out.println("-------------------------------------------------------------------------------------\n");
 
         // If nothing was found, notify the user
         if (!anyFound) {
             System.out.println("No transactions found for the previous year.");
         }
+        System.out.println("-------------------------------------------------------------------------------------\n");
+
     }
     // Displays all transactions by receiving vendor from user
     public static void searchByVendor() {
@@ -627,11 +625,82 @@ public class AccountingLedgerApp {
                 System.out.println("Skipping due to vendor error: " + e.getMessage());
             }
         }
-        System.out.println("-------------------------------------------------------------------------------------\n");
         // If no matches were found, notify the user
         if (!anyFound) {
             System.out.println("No transactions found for vendor: " + searchVendor);
         }
+        System.out.println("-------------------------------------------------------------------------------------\n");
+
+    }
+    // Displays all transactions by receiving customize input from user
+    public static void customSearchReport() {
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                        🛠️ CUSTOM SEARCH REPORT (CHALLENGE)                       \n"+
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        // Load fresh data from file
+        loadTransactionForReportOnly();
+
+        // Prompt user for filters (can skip any field)
+        String startDateInput = askQuestion("Enter start date (yyyy-MM-dd) or leave blank: ");
+        String endDateInput = askQuestion("Enter end date (yyyy-MM-dd) or leave blank: ");
+        String descInput = askQuestion("Enter a description to search or leave blank: ").toLowerCase();
+        String vendorInput = askQuestion("Enter vendor name to search or leave blank: ").toLowerCase();
+        String amountInput = askQuestion("Enter amount to search or leave blank: ");
+
+        boolean anyFound = false;
+        System.out.println("\nDate        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+        for (Transaction transaction : transactions) {
+            try {
+                // Initial assumptions: all conditions match
+                boolean matches = true;
+
+                // Check each field only if user provided a value
+                if (!startDateInput.isEmpty()) {
+                    LocalDate startDate = LocalDate.parse(startDateInput);
+                    if (transaction.getDate().isBefore(startDate)) {
+                        matches = false;
+                    }
+                }
+
+                if (!endDateInput.isEmpty()) {
+                    LocalDate endDate = LocalDate.parse(endDateInput);
+                    if (transaction.getDate().isAfter(endDate)) {
+                        matches = false;
+                    }
+                }
+
+                if (!descInput.isEmpty() && !transaction.getDescription().toLowerCase().contains(descInput)) {
+                    matches = false;
+                }
+
+                if (!vendorInput.isEmpty() && !transaction.getVendor().toLowerCase().contains(vendorInput)) {
+                    matches = false;
+                }
+
+                if (!amountInput.isEmpty()) {
+                    double amountSearch = Double.parseDouble(amountInput);
+                    if (transaction.getAmount() != amountSearch) {
+                        matches = false;
+                    }
+                }
+
+                // If all matched conditions are true, display the transaction
+                if (matches) {
+                    System.out.println(transaction.toString());
+                    anyFound = true;
+                }
+
+            } catch (Exception e) {
+                System.out.println("Skipping entry due to input or filter error: " + e.getMessage());
+            }
+        }
+
+        if (!anyFound) {
+            System.out.println("No matching transactions found based on your filters.");
+        }
+        System.out.println("-------------------------------------------------------------------------------------\n");
     }
 
     // will load current contents of the transaction fror reports only
