@@ -37,9 +37,13 @@ public class Transaction {
     public Double getAmount() {
         return amount;
     }
-
     @Override
     public String toString() {
-        return date + " | " + time + " | " + description + " | " + vendor + " | " + amount;
+        String type = (amount >= 0) ? "Deposit" : "Payment";
+
+        return String.format("%-11s | %-8s | %-25s | %-20s | %-10.2f | %-8s",
+                date, time, description, vendor, amount, type);
     }
+
+
 }

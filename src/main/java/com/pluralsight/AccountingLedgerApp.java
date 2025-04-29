@@ -19,9 +19,9 @@ public class AccountingLedgerApp {
 
     public static void main(String[] args) {
         try {
-            createFileWithHeader();  // << create file and header if needed
-            //loadTransactions();      // << load transactions to memory
-            mainMenu();              // << run menu
+            createFileWithHeader();
+           // loadTransactions();      // load transactions to memory
+            mainMenu();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -33,15 +33,15 @@ public class AccountingLedgerApp {
         // Loop to keep showing the menu until appRunning becomes false
         while (appRunning) {
             try {
-                System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                                     "            💰 WELCOME TO ACCOUNTING LEDGER APPLICATION 💰                        \n" +
                                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                                     " What would you like to do today?                                                   \n" +
                                     " D️ -  Add Deposit                                                                   \n" +
                                     " P️ -  Make Payment                                                                   \n" +
-                                    " L️ -  Ledger (View all your transactions)                                            \n" +
+                                    " L️ -  Ledger (View transactions)                                            \n" +
                                     " X️ -  Exit the application                                                           \n" +
-                                    "-------------------------------------------------------------------------------------");
+                                    "-----------------------------------------------------------------------------------");
 
                 // Read user's menu choice
                 String menuChoice = askQuestion("Please enter your choice: ").toUpperCase();
@@ -79,9 +79,9 @@ public class AccountingLedgerApp {
     // Method for Add Deposit
     public static void addDeposit() {
 
-        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
                             "                                🏦 ADD A NEW DEPOSIT                             \n"+
-                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         // Boolean to keep the app running until user chooses to exit
         boolean appRunning = true;
         // Loop to keep showing the menu until appRunning becomes false
@@ -119,7 +119,8 @@ public class AccountingLedgerApp {
 
 
                 // Write the transaction details
-                String depositEntry = date + " | " + time + " | " + description + " | " + vendor + " | " + amount;
+                String depositEntry = String.format("%-12s | %-8s | %-25s | %-20s | %-10.2f",
+                        date, time, description, vendor, amount);
                 buffWriter.write(depositEntry); // write inputs to transactions file
                 buffWriter.newLine(); // go to next line for the next entry
                 // Close the writer
@@ -158,13 +159,13 @@ public class AccountingLedgerApp {
             }
         }
     }
-    
+
     // Method for Make Payment
     public static void makePayment() {
         boolean appRunning = true;
-        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
-                "                                🧾 MAKE A PAYMENT                                \n"+
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                                🧾 MAKE A PAYMENT                                \n"+
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
         while (appRunning) {
             try {
@@ -199,8 +200,8 @@ public class AccountingLedgerApp {
                 BufferedWriter buffWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv", true));
 
                 // Write the payment details
-                String paymentEntry = date + " | " + time + " | " + description + " | " + vendor + " | " + amount;
-                buffWriter.write(paymentEntry);
+                String paymentEntry = String.format("%-12s | %-8s | %-25s | %-20s | %-10.2f",
+                        date, time, description, vendor, amount);                buffWriter.write(paymentEntry);
                 buffWriter.newLine(); // go to next line for the next entry
                 buffWriter.close();
 
@@ -240,10 +241,79 @@ public class AccountingLedgerApp {
 
     // Method for Ledger Menu
     public static void ledgerMenu() {
-        System.out.println("\n[Ledger Menu will be implemented here]");
+        // Boolean to keep the app running until user chooses to exit
+        boolean appRunning = true;
+        // Loop to keep showing the menu until appRunning becomes false
+        while (appRunning) {
+            try {
+                System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                                    "                             📒 LEDGER MENU                                   \n" +
+                                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                                    " What would you like to do today?                                                   \n" +
+                                    " A - View All Transactions                                                            \n" +
+                                    " D - View Deposits Only                                                                \n" +
+                                    " P - View Payments Only                                                               \n" +
+                                    " R - View Reports                                                               \n" +
+                                    " H - Return to Home Menu                                                             \n" +
+                                    "-----------------------------------------------------------------------------------");
+
+                // Read user's menu choice
+                String choice = askQuestion("Please enter your choice (A/D/P/R/H): ").toUpperCase();
+
+                switch (choice) {
+                    case "A":
+                        loadTransactions();
+                        break;
+                    case "D":
+                        viewDepositsOnly();
+                        break;
+                    case "P":
+                        viewPaymentsOnly();
+                        break;
+                    case "R":
+                        reportsMenu();
+                        break;
+                    case "H":
+                        appRunning = false; // Return to home
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please select A, D, P, R, or H.");
+                        break;
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please try again!");
+                input.nextLine(); // Clear the buffer
+            }
+        }
+    }
+    private static void viewDepositsOnly() {
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                                         ALL DEPOSITS                                   "+
+                            "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        for (Transaction transaction : transactions) {
+            if (transaction.getAmount() > 0) {
+                System.out.println(transaction.toString());
+            }
+        }
+        System.out.println("-----------------------------------------------------------------------------------\n");
+
+    }
+    private static void viewPaymentsOnly() {
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                        "                                    ALL PAYMENTS                                      "+
+                        "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        for (Transaction transaction : transactions) {
+            if (transaction.getAmount() < 0) {
+                System.out.println(transaction.toString());
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------\n");
     }
     public static void loadTransactions() {
         try {
+            System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                                "                                  ALL TRANSACTIONS                                 "+
+                                "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
             BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/transactions.csv"));
             String line;
             reader.readLine(); // Skip header
@@ -264,12 +334,75 @@ public class AccountingLedgerApp {
                 transactions.add(transactionFields);
             }
             reader.close();
+            System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+            for (Transaction transaction : transactions) {
+                System.out.println(transaction.toString());
+            }
+            System.out.println("-----------------------------------------------------------------------------------\n");
+
         } catch (FileNotFoundException e) {
             System.out.println("No existing transactions found. Starting fresh!");
         } catch (IOException e) {
             System.out.println("Error reading transactions file: " + e.getMessage());
         }
     }
+    public static void reportsMenu() {
+        boolean running = true;
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                            "                             📑 REPORTS MENU                                   \n" +
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                            " What would you like to do today?                                                   \n" +
+                            " 1 - Month To Date                                                                   \n" +
+                            " 2 - Previous Month                                                                  \n" +
+                            " 3 - Year To Date                                                                    \n" +
+                            " 4 - Previous Year                                                                   \n" +
+                            " 5 - Search by Vendor                                                                \n" +
+                            " 6 - Challenge Yourself - Custom Report                                              \n" +
+                            " 0 - Back to Ledger Menu                                                             \n" +
+                            " H - Return to Home Menu                                                             \n" +
+                            "-----------------------------------------------------------------------------------");
+
+        while (running) {
+            try {
+                String choice = askQuestion("Enter your choice (1-6, 0, H): ").toUpperCase();
+
+                switch (choice) {
+                    case "1":
+                        //monthToDateReport();
+                        break;
+                    case "2":
+                        //previousMonthReport();
+                        break;
+                    case "3":
+                        //yearToDateReport();
+                        break;
+                    case "4":
+                        //previousYearReport();
+                        break;
+                    case "5":
+                        //searchByVendor();
+                        break;
+                    case "6":
+                        //challengeYourselfReport();
+                        break;
+                    case "0":
+                        running = false; // Go back to Ledger Menu
+                        break;
+                    case "H":
+                        mainMenu(); // Return to Home Menu
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please select 1-6, 0, or H.");
+                        break;
+                }
+            } catch (Exception e) {
+                System.out.println("An error occurred. Please try again!");
+                input.nextLine(); // Clear buffer
+            }
+        }
+    }
+
+
     public static void createFileWithHeader() {
         try {
             String filePath = "src/main/resources/transactions.csv";
@@ -278,7 +411,8 @@ public class AccountingLedgerApp {
             if (!file.exists()) {
                 // If file doesn't exist, create it and write header
                 BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
-                writer.write("Date | Time | Description | Vendor | Amount");
+                writer.write(String.format("%-12s | %-8s | %-25s | %-20s | %10s",
+                        "Date", "Time", "Description", "Vendor", "Amount"));
                 writer.newLine();
                 writer.close();
             } else {
@@ -290,7 +424,8 @@ public class AccountingLedgerApp {
                 if (firstLine == null || firstLine.isEmpty()) {
                     // File is empty, so write header
                     BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
-                    writer.write("Date | Time | Description | Vendor | Amount");
+                    writer.write(String.format("%-12s | %-8s | %-25s | %-20s | %10s",
+                            "Date", "Time", "Description", "Vendor", "Amount"));
                     writer.newLine();
                     writer.close();
                 }
@@ -299,7 +434,6 @@ public class AccountingLedgerApp {
             System.out.println("Error checking or creating transaction file: " + e.getMessage());
         }
     }
-
     public static String capitalizeWords(String input) {
         String[] words = input.trim().toLowerCase().split("\\s+");  // Split by spaces
         StringBuilder capitalized = new StringBuilder();
