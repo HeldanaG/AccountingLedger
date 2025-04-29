@@ -20,7 +20,6 @@ public class AccountingLedgerApp {
     public static void main(String[] args) {
         try {
             createFileWithHeader();
-           // loadTransactions();      // load transactions to memory
             mainMenu();
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,15 +77,14 @@ public class AccountingLedgerApp {
 
     // Method for Add Deposit
     public static void addDeposit() {
-
-        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
-                            "                                🏦 ADD A NEW DEPOSIT                             \n"+
-                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         // Boolean to keep the app running until user chooses to exit
         boolean appRunning = true;
         // Loop to keep showing the menu until appRunning becomes false
         while (appRunning) {
             try {
+                System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                                    "                                🏦 ADD A NEW DEPOSIT                             \n"+
+                                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 // Refresh current time
                 currentTime = LocalDateTime.now();
                 formatedCurrentTime = currentTime.format(currentTimeFormatter);
@@ -162,13 +160,14 @@ public class AccountingLedgerApp {
 
     // Method for Make Payment
     public static void makePayment() {
+        // Boolean to keep the app running until user chooses to exit
         boolean appRunning = true;
-        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
-                            "                                🧾 MAKE A PAYMENT                                \n"+
-                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
+        // Loop to keep showing the menu until appRunning becomes false
         while (appRunning) {
             try {
+                System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                                    "                                🧾 MAKE A PAYMENT                                \n"+
+                                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 // Refresh current time
                 currentTime = LocalDateTime.now();
                 formatedCurrentTime = currentTime.format(currentTimeFormatter);
@@ -286,6 +285,7 @@ public class AccountingLedgerApp {
             }
         }
     }
+    // Displays all deposits in the Transaction
     private static void viewDepositsOnly() {
         System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
                             "                                         ALL DEPOSITS                                   "+
@@ -298,6 +298,7 @@ public class AccountingLedgerApp {
         System.out.println("-----------------------------------------------------------------------------------\n");
 
     }
+    // Displays all Payments in the Transaction
     private static void viewPaymentsOnly() {
         System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                         "                                    ALL PAYMENTS                                      "+
@@ -309,6 +310,7 @@ public class AccountingLedgerApp {
         }
         System.out.println("-------------------------------------------------------------------------------------\n");
     }
+    // Displays all transactions
     public static void loadTransactions() {
         try {
             System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
@@ -346,47 +348,49 @@ public class AccountingLedgerApp {
             System.out.println("Error reading transactions file: " + e.getMessage());
         }
     }
+    // Method for Report Menu
     public static void reportsMenu() {
-        boolean running = true;
-        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                            "                             📑 REPORTS MENU                                   \n" +
-                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                            " What would you like to do today?                                                   \n" +
-                            " 1 - Month To Date                                                                   \n" +
-                            " 2 - Previous Month                                                                  \n" +
-                            " 3 - Year To Date                                                                    \n" +
-                            " 4 - Previous Year                                                                   \n" +
-                            " 5 - Search by Vendor                                                                \n" +
-                            " 6 - Challenge Yourself - Custom Report                                              \n" +
-                            " 0 - Back to Ledger Menu                                                             \n" +
-                            " H - Return to Home Menu                                                             \n" +
-                            "-----------------------------------------------------------------------------------");
-
-        while (running) {
+        // Boolean to keep the app running until user chooses to exit
+        boolean appRunning = true;
+        // Loop to keep showing the menu until appRunning becomes false
+        while (appRunning) {
             try {
+                System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                        "                             📑 REPORTS MENU                                   \n" +
+                        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                        " What would you like to do today?                                                   \n" +
+                        " 1 - Month To Date                                                                   \n" +
+                        " 2 - Previous Month                                                                  \n" +
+                        " 3 - Year To Date                                                                    \n" +
+                        " 4 - Previous Year                                                                   \n" +
+                        " 5 - Search by Vendor                                                                \n" +
+                        " 6 - Challenge Yourself - Custom Report                                              \n" +
+                        " 0 - Back to Ledger Menu                                                             \n" +
+                        " H - Return to Home Menu                                                             \n" +
+                        "-----------------------------------------------------------------------------------");
                 String choice = askQuestion("Enter your choice (1-6, 0, H): ").toUpperCase();
 
                 switch (choice) {
                     case "1":
-                        //monthToDateReport();
+                        monthToDateReport();
                         break;
                     case "2":
-                        //previousMonthReport();
+                        previousMonthReport();
                         break;
                     case "3":
-                        //yearToDateReport();
+                        yearToDateReport();
                         break;
                     case "4":
-                        //previousYearReport();
+                        previousYearReport();
                         break;
                     case "5":
-                        //searchByVendor();
+                        searchByVendor();
                         break;
                     case "6":
                         //challengeYourselfReport();
                         break;
                     case "0":
-                        running = false; // Go back to Ledger Menu
+                        appRunning = false; // Go back to Ledger Menu
                         break;
                     case "H":
                         mainMenu(); // Return to Home Menu
@@ -402,7 +406,268 @@ public class AccountingLedgerApp {
         }
     }
 
+    // Displays all transactions that occurred in the current month and year
+    public static void monthToDateReport() {
+        // Display the report heading
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                             📆 MONTH TO DATE REPORT                                \n"+
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
+        // Load latest transactions from file
+        loadTransactionForReportOnly();
+        // Get today's date
+        LocalDate today = LocalDate.now();
+        int currentYear = today.getYear();
+        int currentMonth = today.getMonthValue();
+
+        boolean anyFound = false; // Track if any transactions were found
+
+        System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+        // Loop through all transactions stored in memory
+        for (Transaction transaction : transactions) {
+            try {
+
+                LocalDate transactionDate = transaction.getDate();
+                // Check if the transaction's year and month match today's year and month
+                if (transactionDate.getYear() == currentYear &&
+                        transactionDate.getMonthValue() == currentMonth) {
+
+                    // Print the transaction details
+                    System.out.println(transaction.toString());
+                    anyFound = true; // At least one transaction found
+
+                }
+
+            } catch (Exception e) {
+                // Handle any parsing errors without crashing the program
+                System.out.println("Skipping an invalid transaction date: " + transaction.getDate());
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------\n");
+
+        // If no transactions found, inform the user
+        if (!anyFound) {
+            System.out.println("No transactions found for this month.");
+        }
+    }
+    // Displays all transactions that occurred in the previous month and current year
+    public static void previousMonthReport() {
+        // Print report header
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                             📆 PREVIOUS MONTH REPORT                                \n"+
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        // Load transactions without printing to avoid duplicate output
+        loadTransactionForReportOnly();
+
+        // Get today's date and calculate the previous month
+        LocalDate today = LocalDate.now();
+        LocalDate previousMonth = today.minusMonths(1);
+
+        // Extract the target year and month
+        int targetYear = previousMonth.getYear();
+        int targetMonth = previousMonth.getMonthValue();
+
+        boolean anyFound = false; // Tracks whether any transactions were found
+
+        System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+        // Loop through all loaded transactions
+        for (Transaction transaction : transactions) {
+            try {
+                // Get the transaction's date
+                LocalDate transactionDate = transaction.getDate();
+
+                // Check if it matches the previous month and year
+                if (transactionDate.getYear() == targetYear &&
+                        transactionDate.getMonthValue() == targetMonth) {
+
+                    // Print matching transaction
+                    System.out.println(transaction.toString());
+                    anyFound = true;
+                }
+
+            } catch (Exception e) {
+                // Catch and report errors but continue
+                System.out.println("Skipping invalid transaction: " + e.getMessage());
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------\n");
+
+
+        // Inform user if no results found
+        if (!anyFound) {
+            System.out.println("No transactions found for the previous month.");
+        }
+    }
+    // Displays all transactions that occurred in the current year
+    public static void yearToDateReport() {
+        // Display the report header
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                             📆 YEAR TO DATE REPORT                                 \n"+
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        // Load fresh transaction data
+        loadTransactionForReportOnly();
+
+        // Get today's date
+        LocalDate today = LocalDate.now();
+
+        // Get the first day of the current year (January 1st)
+        LocalDate startOfYear = LocalDate.of(today.getYear(), 1, 1);
+
+        boolean anyFound = false; // Flag to track if matching transactions are found
+
+        System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+        // Loop through all transactions in memory
+        for (Transaction transaction : transactions) {
+            try {
+                LocalDate transactionDate = transaction.getDate();
+
+                // Check if transaction date is within start of year and today (inclusive)
+                if ((transactionDate.isEqual(startOfYear) || transactionDate.isAfter(startOfYear)) &&
+                        (transactionDate.isBefore(today) || transactionDate.isEqual(today))) {
+
+                    // Print matching transaction
+                    System.out.println(transaction.toString());
+                    anyFound = true;
+                }
+
+            } catch (Exception e) {
+                // Catch any parsing or date logic errors without crashing
+                System.out.println("Skipping transaction due to error: " + e.getMessage());
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------\n");
+
+        // If no matching entries were found, let the user know
+        if (!anyFound) {
+            System.out.println("No transactions found for this year up to today.");
+        }
+    }
+    // Displays all transactions that occurred in the previous year
+    public static void previousYearReport() {
+        // Print the section header
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                             📆 PREVIOUS YEAR REPORT                                 \n"+
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        // Load a fresh copy of transactions
+        loadTransactionForReportOnly();
+
+        // Get today's date and determine last year
+        LocalDate today = LocalDate.now();
+        int previousYear = today.getYear() - 1;
+
+        // Define the range: Jan 1st to Dec 31st of last year
+        LocalDate startDate = LocalDate.of(previousYear, 1, 1);
+        LocalDate endDate = LocalDate.of(previousYear, 12, 31);
+
+        boolean anyFound = false; // Used to track if any match is found
+
+        System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+        // Loop through all transactions in memory
+        for (Transaction transaction : transactions) {
+            try {
+                LocalDate transactionDate = transaction.getDate();
+
+                // Check if the transaction date falls within the previous year range
+                if ((transactionDate.isEqual(startDate) || transactionDate.isAfter(startDate)) &&
+                        (transactionDate.isBefore(endDate) || transactionDate.isEqual(endDate))) {
+
+                    // Display the transaction
+                    System.out.println(transaction.toString());
+                    anyFound = true;
+                }
+
+            } catch (Exception e) {
+                // Skip problematic rows gracefully
+                System.out.println("Skipping due to date error: " + e.getMessage());
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------\n");
+
+        // If nothing was found, notify the user
+        if (!anyFound) {
+            System.out.println("No transactions found for the previous year.");
+        }
+    }
+    // Displays all transactions by receiving vendor from user
+    public static void searchByVendor() {
+        // Print the section header
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                            🔍 SEARCH BY VENDOR                                   \n"+
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        // Load the latest transaction data into memory
+        loadTransactionForReportOnly();
+
+        // Ask the user for a vendor name
+        String searchVendor = askQuestion("Enter vendor name to search: ").toLowerCase();
+
+        boolean anyFound = false; // Track if any match is found
+
+        System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+        // Loop through all transactions in memory
+        for (Transaction transaction : transactions) {
+            try {
+                // Convert vendor name to lowercase for case-insensitive search
+                String transactionVendor = transaction.getVendor().toLowerCase();
+
+                // If the vendor name contains the user's input, display it
+                if (transactionVendor.contains(searchVendor)) {
+                    System.out.println(transaction.toString());
+                    anyFound = true;
+                }
+
+            } catch (Exception e) {
+                System.out.println("Skipping due to vendor error: " + e.getMessage());
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------\n");
+        // If no matches were found, notify the user
+        if (!anyFound) {
+            System.out.println("No transactions found for vendor: " + searchVendor);
+        }
+    }
+
+    // will load current contents of the transaction fror reports only
+    public static void loadTransactionForReportOnly(){
+        transactions.clear(); // ✅ Clear old data before reloading
+            try {
+
+                BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/transactions.csv"));
+                String line;
+                reader.readLine(); // Skip header
+
+                while ((line = reader.readLine()) != null) {
+                    if (line.trim().isEmpty()) {
+                        continue; // skip empty lines
+                    }
+                    String[] fields = line.split("\\|");
+
+                    Transaction transactionFields = new Transaction(
+                            LocalDate.parse(fields[0].trim()),
+                            LocalTime.parse(fields[1].trim()),
+                            fields[2].trim(),
+                            fields[3].trim(),
+                            Double.parseDouble(fields[4].trim())
+                    );
+                    transactions.add(transactionFields);
+                }
+                reader.close();
+
+            } catch (FileNotFoundException e) {
+                System.out.println("No existing transactions found. Starting fresh!");
+            } catch (IOException e) {
+                System.out.println("Error reading transactions file: " + e.getMessage());
+            }
+
+    }
+    // check if file has a header if not create header for the file only
     public static void createFileWithHeader() {
         try {
             String filePath = "src/main/resources/transactions.csv";
@@ -411,7 +676,7 @@ public class AccountingLedgerApp {
             if (!file.exists()) {
                 // If file doesn't exist, create it and write header
                 BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
-                writer.write(String.format("%-12s | %-8s | %-25s | %-20s | %10s",
+                writer.write(String.format("%-12s | %-8s | %-25s | %-20s | %-10s",
                         "Date", "Time", "Description", "Vendor", "Amount"));
                 writer.newLine();
                 writer.close();
@@ -424,7 +689,7 @@ public class AccountingLedgerApp {
                 if (firstLine == null || firstLine.isEmpty()) {
                     // File is empty, so write header
                     BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
-                    writer.write(String.format("%-12s | %-8s | %-25s | %-20s | %10s",
+                    writer.write(String.format("%-12s | %-8s | %-25s | %-20s | %-10s",
                             "Date", "Time", "Description", "Vendor", "Amount"));
                     writer.newLine();
                     writer.close();
@@ -434,6 +699,7 @@ public class AccountingLedgerApp {
             System.out.println("Error checking or creating transaction file: " + e.getMessage());
         }
     }
+    // capitalize each input that made to the file
     public static String capitalizeWords(String input) {
         String[] words = input.trim().toLowerCase().split("\\s+");  // Split by spaces
         StringBuilder capitalized = new StringBuilder();
@@ -447,6 +713,7 @@ public class AccountingLedgerApp {
         }
         return capitalized.toString().trim();  // Remove extra space at end
     }
+    // to use to ask questions instead of writing multiple line to ask
     public static String askQuestion(String question){
         System.out.print(question);
         String answer =input.nextLine();
