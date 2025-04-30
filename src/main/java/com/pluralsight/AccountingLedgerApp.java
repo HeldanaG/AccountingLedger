@@ -6,8 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
+import java.lang.*;
 
 public class AccountingLedgerApp {
     static Scanner input = new Scanner(System.in);
@@ -19,11 +19,65 @@ public class AccountingLedgerApp {
 
     public static void main(String[] args) {
         try {
-            createFileWithHeader();
-            mainMenu();
+            if (authenticateUser()) {
+                createFileWithHeader();
+                mainMenu();
+            } else {
+                System.out.println("Too many failed attempts. Exiting application.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    // Prompts the user for a username and password (3 attempts max)
+    public static boolean authenticateUser() {
+        // Section header
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                            "                                 🔐 LOGIN REQUIRED                                    " +
+                            "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        String correctUsername = "heldana";
+        String correctPassword = "ledger123";
+        int attempts = 0;
+
+        // Allow up to 3 login attempts
+        while (attempts < 3) {
+            // Prompt for username
+            String enteredUsername = askQuestion("Username: ");
+
+            String enteredPassword;
+
+            // Attempt to use hidden password input if possible
+            Console console = System.console();
+            if (console != null) {
+                char[] passwordChars = console.readPassword("Password: ");
+                enteredPassword = new String(passwordChars);
+            } else {
+
+                enteredPassword = askQuestion("Password: ");
+            }
+
+            // Check login credentials
+            if (enteredUsername.equals(correctUsername) && enteredPassword.equals(correctPassword)) {
+                System.out.println("Login successful.");
+                System.out.println("-----------------------------------------------------------------------------------\n");
+                return true;
+            } else {
+                // Specific feedback
+                if (!enteredUsername.equals(correctUsername) && !enteredPassword.equals(correctPassword)) {
+                    System.out.println("Both username and password are incorrect.\n");
+                } else if (!enteredUsername.equals(correctUsername)) {
+                    System.out.println("Username is incorrect.\n");
+                } else {
+                    System.out.println("Password is incorrect.\n");
+                }
+                attempts++;
+            }
+        }
+
+        // Section footer
+        System.out.println("-----------------------------------------------------------------------------------\n");
+        return false;
     }
 
     public static void mainMenu() {
@@ -85,6 +139,8 @@ public class AccountingLedgerApp {
                 System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
                                     "                                🏦 ADD A NEW DEPOSIT                             \n"+
                                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+
                 // Refresh current time
                 currentTime = LocalDateTime.now();
                 formatedCurrentTime = currentTime.format(currentTimeFormatter);
@@ -112,21 +168,35 @@ public class AccountingLedgerApp {
                     amount = Double.parseDouble(askQuestion("Amount must be positive. Enter deposit amount: "));
                 }
 
-                // OPEN a new BufferedWriter locally in append mode
-                BufferedWriter buffWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv", true));
-
-
-                // Write the transaction details
-                String depositEntry = String.format("%-12s | %-8s | %-25s | %-20s | %-10.2f",
+                // Create new entry line
+                String newEntry = String.format("%-12s | %-8s | %-25s | %-19s | %-10.2f",
                         date, time, description, vendor, amount);
-                buffWriter.write(depositEntry); // write inputs to transactions file
-                buffWriter.newLine(); // go to next line for the next entry
-                // Close the writer
-                buffWriter.close();
 
-                // Also add to transactions ArrayList
+                // Read existing lines
+                BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/transactions.csv"));
+                String header = reader.readLine(); // preserve header
+
+                //You're creating a new StringBuilder to hold all the content that will be written to the file again.
+                StringBuilder updatedContent = new StringBuilder(header).append("\n").append(newEntry).append("\n");
+
+                //Now we start reading the rest of the file (old transactions).
+                //Each one is added after the new entry.
+                //So we’re building a complete new version of the file in memory with this order
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    updatedContent.append(line).append("\n");
+                }
+                reader.close();
+
+                // Rewrite file
+                BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv"));
+                //That line replaces the file contents with the full updatedContent.
+                writer.write(updatedContent.toString());
+                writer.close();
+
+                // Add to memory list
                 Transaction newDeposit = new Transaction(LocalDate.parse(date), LocalTime.parse(time), description, vendor, amount);
-                transactions.add(newDeposit);
+                transactions.add(0, newDeposit); // add to top of list
 
                 System.out.println("\nDeposit added successfully!");
 
@@ -195,18 +265,34 @@ public class AccountingLedgerApp {
                 // Make amount negative for payment
                 amount = -Math.abs(amount);
 
-                // OPEN a new BufferedWriter locally in append mode
-                BufferedWriter buffWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv", true));
+                // Create new entry line
+                String newEntry = String.format("%-12s | %-8s | %-25s | %-19s | %-9.2f",
+                        date, time, description, vendor, amount);
 
-                // Write the payment details
-                String paymentEntry = String.format("%-12s | %-8s | %-25s | %-20s | %-10.2f",
-                        date, time, description, vendor, amount);                buffWriter.write(paymentEntry);
-                buffWriter.newLine(); // go to next line for the next entry
-                buffWriter.close();
+                // Read existing lines
+                BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/transactions.csv"));
+                String header = reader.readLine(); // preserve header
+                //You're creating a new StringBuilder to hold all the content that will be written to the file again.
+                StringBuilder updatedContent = new StringBuilder(header).append("\n").append(newEntry).append("\n");
 
-                // Also add to transactions ArrayList
+                //Now we start reading the rest of the file (old transactions).
+                //Each one is added after the new entry.
+                //So we’re building a complete new version of the file in memory with this order
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    updatedContent.append(line).append("\n");// maintain their order
+                }
+                reader.close();
+
+                // Rewrite file
+                BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv"));
+                //That line replaces the file contents with the full updatedContent.
+                writer.write(updatedContent.toString());
+                writer.close();
+
+                // Add to memory list
                 Transaction newPayment = new Transaction(LocalDate.parse(date), LocalTime.parse(time), description, vendor, amount);
-                transactions.add(newPayment);
+                transactions.add(0, newPayment); // add to top of list
 
                 System.out.println("\nPayment added successfully!");
 
@@ -246,13 +332,14 @@ public class AccountingLedgerApp {
         while (appRunning) {
             try {
                 System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                                    "                             📒 LEDGER MENU                                   \n" +
+                                    "                             📒 LEDGER MENU                                         \n" +
                                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                                     " What would you like to do today?                                                   \n" +
-                                    " A - View All Transactions                                                            \n" +
+                                    " A - View All Transactions                                                           \n" +
+                                    " B - View Balance Summary                                                              \n" +
                                     " D - View Deposits Only                                                                \n" +
                                     " P - View Payments Only                                                               \n" +
-                                    " R - View Reports                                                               \n" +
+                                    " R - View Reports                                                                     \n" +
                                     " H - Return to Home Menu                                                             \n" +
                                     "-----------------------------------------------------------------------------------");
 
@@ -262,6 +349,9 @@ public class AccountingLedgerApp {
                 switch (choice) {
                     case "A":
                         loadTransactions();
+                        break;
+                    case "B":
+                        viewBalanceSummary();
                         break;
                     case "D":
                         viewDepositsOnly();
@@ -285,36 +375,12 @@ public class AccountingLedgerApp {
             }
         }
     }
-    // Displays all deposits in the Transaction
-    private static void viewDepositsOnly() {
-        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
-                            "                                         ALL DEPOSITS                                   "+
-                            "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-        for (Transaction transaction : transactions) {
-            if (transaction.getAmount() > 0) {
-                System.out.println(transaction.toString());
-            }
-        }
-        System.out.println("-----------------------------------------------------------------------------------\n");
-
-    }
-    // Displays all Payments in the Transaction
-    private static void viewPaymentsOnly() {
-        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                        "                                    ALL PAYMENTS                                      "+
-                        "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-        for (Transaction transaction : transactions) {
-            if (transaction.getAmount() < 0) {
-                System.out.println(transaction.toString());
-            }
-        }
-        System.out.println("-------------------------------------------------------------------------------------\n");
-    }
     // Displays all transactions
     public static void loadTransactions() {
+        transactions.clear(); //  Clear old data before reloading
         try {
             System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
-                                "                                  ALL TRANSACTIONS                                 "+
+                                "                           📋 ALL TRANSACTIONS                                     " +
                                 "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
             BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/transactions.csv"));
             String line;
@@ -337,6 +403,12 @@ public class AccountingLedgerApp {
             }
             reader.close();
             System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+            // Sort transactions from newest to oldest (by date and time)
+            Collections.sort(transactions, Comparator.comparing(
+                    (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+            ).reversed());
+
             for (Transaction transaction : transactions) {
                 System.out.println(transaction.toString());
             }
@@ -347,6 +419,80 @@ public class AccountingLedgerApp {
         } catch (IOException e) {
             System.out.println("Error reading transactions file: " + e.getMessage());
         }
+    }
+    // Displays total deposits, total payments, and the current balance
+    public static void viewBalanceSummary() {
+        // Section header
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                            "                                 💰 BALANCE SUMMARY                                   " +
+                            "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        // Load the most up-to-date list of transactions
+        loadTransactionForReportOnly();
+
+        double totalDeposits = 0;
+        double totalPayments = 0;
+
+        // Loop through transactions and calculate totals
+        for (Transaction t : transactions) {
+            if (t.getAmount() > 0) {
+                totalDeposits += t.getAmount();
+            } else {
+                totalPayments += t.getAmount(); // Already negative
+            }
+        }
+
+        // Compute current balance
+        double balance = totalDeposits + totalPayments;
+
+        // Display the summary in formatted rows
+        System.out.printf("Total Deposits:     $%.2f\n", totalDeposits);
+        System.out.printf("Total Payments:     $%.2f\n", totalPayments);
+        System.out.printf("Current Balance:    $%.2f\n", balance);
+
+        System.out.println("-----------------------------------------------------------------------------------\n");
+    }
+    // Displays all deposits in the Transaction
+    private static void viewDepositsOnly() {
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+                            "                                   💵 ALL DEPOSITS                                     " +
+                            "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        // Load a fresh copy of transactions
+        loadTransactionForReportOnly();
+
+        // Sort transactions from newest to oldest (by date and time)
+        Collections.sort(transactions, Comparator.comparing(
+                (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+        ).reversed());
+
+        for (Transaction transaction : transactions) {
+            if (transaction.getAmount() > 0) {
+                System.out.println(transaction.toString());
+            }
+        }
+        System.out.println("-----------------------------------------------------------------------------------\n");
+
+    }
+    // Displays all Payments in the Transaction
+    private static void viewPaymentsOnly() {
+        System.out.println("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                            "                                 🧾 ALL PAYMENTS                                      " +
+                            "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        // Load a fresh copy of transactions
+        loadTransactionForReportOnly();
+
+        // Sort transactions from newest to oldest (by date and time)
+        Collections.sort(transactions, Comparator.comparing(
+                (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+        ).reversed());
+
+        for (Transaction transaction : transactions) {
+            if (transaction.getAmount() < 0) {
+                System.out.println(transaction.toString());
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------\n");
     }
     // Method for Report Menu
     public static void reportsMenu() {
@@ -424,6 +570,11 @@ public class AccountingLedgerApp {
 
         System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
 
+        // Sort transactions from newest to oldest (by date and time)
+        Collections.sort(transactions, Comparator.comparing(
+                (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+        ).reversed());
+
         // Loop through all transactions stored in memory
         for (Transaction transaction : transactions) {
             try {
@@ -472,6 +623,11 @@ public class AccountingLedgerApp {
 
         System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
 
+        // Sort transactions from newest to oldest (by date and time)
+        Collections.sort(transactions, Comparator.comparing(
+                (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+        ).reversed());
+
         // Loop through all loaded transactions
         for (Transaction transaction : transactions) {
             try {
@@ -517,6 +673,11 @@ public class AccountingLedgerApp {
         boolean anyFound = false; // Flag to track if matching transactions are found
 
         System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+        // Sort transactions from newest to oldest (by date and time)
+        Collections.sort(transactions, Comparator.comparing(
+                (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+        ).reversed());
 
         // Loop through all transactions in memory
         for (Transaction transaction : transactions) {
@@ -566,6 +727,11 @@ public class AccountingLedgerApp {
 
         System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
 
+        // Sort transactions from newest to oldest (by date and time)
+        Collections.sort(transactions, Comparator.comparing(
+                (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+        ).reversed());
+
         // Loop through all transactions in memory
         for (Transaction transaction : transactions) {
             try {
@@ -609,6 +775,12 @@ public class AccountingLedgerApp {
         boolean anyFound = false; // Track if any match is found
 
         System.out.println("Date        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+        // Sort transactions from newest to oldest (by date and time)
+        Collections.sort(transactions, Comparator.comparing(
+                (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+        ).reversed());
+
         // Loop through all transactions in memory
         for (Transaction transaction : transactions) {
             try {
@@ -650,6 +822,11 @@ public class AccountingLedgerApp {
 
         boolean anyFound = false;
         System.out.println("\nDate        | Time     | Description               | Vendor               | Amount     | Type\n");
+
+        // Sort transactions from newest to oldest (by date and time)
+        Collections.sort(transactions, Comparator.comparing(
+                (Transaction t) -> LocalDateTime.of(t.getDate(), t.getTime())
+        ).reversed());
 
         for (Transaction transaction : transactions) {
             try {
@@ -705,7 +882,7 @@ public class AccountingLedgerApp {
 
     // will load current contents of the transaction fror reports only
     public static void loadTransactionForReportOnly(){
-        transactions.clear(); // ✅ Clear old data before reloading
+        transactions.clear(); //  Clear old data before reloading
             try {
 
                 BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/transactions.csv"));

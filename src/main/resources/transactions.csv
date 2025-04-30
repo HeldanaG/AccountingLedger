@@ -1,5 +1,26 @@
-Date         | Time     | Description               | Vendor               |     Amount
-2024-02-28   | 13:07:38 | Paycheck                  | Amazon               |    2000.00
-2025-03-28   | 13:08:12 | Gift                      | Family               |    1000.00
-2025-04-28   | 13:08:46 | Bill                      | Rent                 |   -1000.00
-2025-04-28   | 13:10:01 | Vacation To Jamica        | Jemica               |   -2000.00
+Date         | Time     | Description               | Vendor              | Amount
+2025-04-30   | 11:15:50 | Monthly Bonus             | HR Dept             | 300.00
+2025-04-25   | 09:20:20 | Tax Refund                | IRS                 | 1200.00
+2025-04-20   | 14:10:12 | Etsy Sale                 | Etsy Store          | 85.50
+2025-04-18   | 12:00:04 | Coffee Shop               | JavaBeans           | -12.25
+2025-04-15   | 08:45:08 | Freelance Coding          | Upwork              | 650.00
+2025-04-10   | 10:30:01 | Software License          | Adobe Inc.          | -29.99
+2025-04-08   | 13:00:35 | Tutoring Income           | Local School        | 180.00
+2025-03-28   | 16:30:19 | Graphic Design Job        | Fiverr              | 275.00
+2025-03-15   | 11:50:11 | Marketing Expense         | AdPro Media         | -310.00
+2025-03-12   | 09:10:21 | Side Hustle Payout        | TaskRabbit          | 90.00
+2025-03-01   | 15:45:34 | Rent Payment              | Green Realty        | -750.00
+2025-02-27   | 08:30:55 | Gift from Family          | Aunt Lily           | 100.00
+2025-02-20   | 14:15:36 | Birthday Present          | Electronics Plus    | -45.00
+2025-02-15   | 10:10:43 | Resume Review Service     | LinkedIn            | -39.99
+2025-02-08   | 12:45:39 | Selling Old Books         | Book Exchange       | 60.00
+2025-02-01   | 17:30:06 | Grocery Reimbursement     | Roommate            | 82.75
+2025-01-25   | 11:05:01 | Online Course Sale        | SkillShare          | 220.00
+2025-01-20   | 10:00:46 | App Store Subscription    | Google Play         | -7.99
+2025-01-10   | 09:30:28 | Pet Sitting Job           | Neighbor Smith      | 95.00
+2025-01-05   | 14:40:38 | Clothes Donation Credit   | Goodwill            | 30.00
+2024-12-15   | 10:20:37 | Freelance Translation     | Upwork              | 145.00
+2024-11-22   | 13:00:09 | Stock Dividend            | Robinhood           | 80.50
+2024-10-30   | 09:45:44 | Web Hosting Renewal       | Bluehost            | -120.00
+2024-09-10   | 16:30:54 | Birthday Gift             | Sister              | -50.00
+2024-08-25   | 12:15:07 | Graphic Tee Sales         | Etsy Store          | 200.00
