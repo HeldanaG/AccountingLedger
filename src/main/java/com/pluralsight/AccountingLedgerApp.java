@@ -45,17 +45,8 @@ public class AccountingLedgerApp {
             // Prompt for username
             String enteredUsername = askQuestion("Username: ");
 
-            String enteredPassword;
+            String enteredPassword = askQuestion("Password: ");
 
-            // Attempt to use hidden password input if possible
-            Console console = System.console();
-            if (console != null) {
-                char[] passwordChars = console.readPassword("Password: ");
-                enteredPassword = new String(passwordChars);
-            } else {
-
-                enteredPassword = askQuestion("Password: ");
-            }
 
             // Check login credentials
             if (enteredUsername.equals(correctUsername) && enteredPassword.equals(correctPassword)) {
