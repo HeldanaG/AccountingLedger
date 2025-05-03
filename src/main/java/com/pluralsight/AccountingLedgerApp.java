@@ -871,7 +871,7 @@ public class AccountingLedgerApp {
         System.out.println("-------------------------------------------------------------------------------------\n");
     }
 
-    // will load current contents of the transaction fror reports only
+    // will load current contents of the transaction for reports only
     public static void loadTransactionForReportOnly(){
         transactions.clear(); //  Clear old data before reloading
             try {
