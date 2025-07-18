@@ -801,7 +801,7 @@ public class AccountingLedgerApp {
                             "                        🛠️ CUSTOM SEARCH REPORT (CHALLENGE)                       \n"+
                             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
-        // Load fresh data from file
+       
         loadTransactionForReportOnly();
 
         // Prompt user for filters (can skip any field)
